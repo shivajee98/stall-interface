@@ -7,5 +7,6 @@ const StallRoomSlider = dynamic(() => import("./_shop/shop"), {
 });
 
 export default function ExhibitionPage() {
+
   return <StallRoomSlider />;
 }

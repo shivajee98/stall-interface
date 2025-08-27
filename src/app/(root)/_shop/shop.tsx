@@ -1,15 +1,13 @@
 "use client";
 
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchExhibitors } from "@/store/exhibitorSlice";
 import Image from "next/image";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import Ceiling from "./Ceiling";
-import Exhibitor from "./Exhibitor";
 import Floor from "./Floor";
 import Wall from "./Wall";
 import HangingBoard from "./HangingBoard";
 import { useRouter } from "next/navigation";
+import { useGetExhibitor } from "@/hooks/useGetExhibitor";
 
 export default function StallRoomSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -17,46 +15,30 @@ export default function StallRoomSlider() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
-  const dispatch = useAppDispatch();
-  const { data, loading, error, dataSource } = useAppSelector((state) => state.exhibitors);
+  const { data, isPending, error } = useGetExhibitor();
   const router = useRouter();
-
-  // Fetch data on component mount
-  useEffect(() => {
-    dispatch(fetchExhibitors());
-  }, [dispatch]);
 
   const slides = useMemo(() => data ?? [], [data]);
 
-  useEffect(() => {
-    console.log("📊 Redux Store - Real Data Status:");
-    console.log("  - Data Source:", dataSource);
-    console.log("  - Loading State:", loading);
-    console.log("  - Error State:", error);
-    console.log("  - Data Count:", data?.length || 0);
-    console.log("  - Current Slide:", currentSlide + 1);
-    console.log("  - Current Exhibitor:", slides[currentSlide]?.name || 'N/A');
-    if (dataSource === 'api') {
-      console.log("✅ Using 100% Real API Data - No Mock Data");
-    }
-  }, [data, dataSource, loading, error, currentSlide, slides]);
+  console.log("slides: ", slides);
+
+
 
   // Use data as the slides array, fallback to empty array if not loaded
   const totalSlides = slides.length;
 
   const nextSlide = useCallback(() => {
+    if (totalSlides === 0) return;
     const newSlide = (currentSlide + 1) % totalSlides;
-    console.log(`🔄 Slide Navigation: ${currentSlide + 1} → ${newSlide + 1}`);
-    console.log(`📊 Data Source: ${dataSource} (Real API Data - No Additional Requests)`);
     setCurrentSlide(newSlide);
-  }, [currentSlide, totalSlides, dataSource]);
+  }, [currentSlide, totalSlides]);
 
   const prevSlide = useCallback(() => {
+    if (totalSlides === 0) return;
     const newSlide = (currentSlide - 1 + totalSlides) % totalSlides;
     console.log(`🔄 Slide Navigation: ${currentSlide + 1} → ${newSlide + 1}`);
-    console.log(`📊 Data Source: ${dataSource} (Real API Data - No Additional Requests)`);
     setCurrentSlide(newSlide);
-  }, [currentSlide, totalSlides, dataSource]);
+  }, [currentSlide, totalSlides]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -86,15 +68,15 @@ export default function StallRoomSlider() {
 
   // Auto-play
   useEffect(() => {
-    if (!autoPlay) return;
+    if (!autoPlay || totalSlides === 0) return;
     const interval = setInterval(nextSlide, 4000);
     return () => clearInterval(interval);
-  }, [currentSlide, autoPlay, nextSlide]);
+  }, [currentSlide, autoPlay, nextSlide, totalSlides]);
 
   const currentSlideData = slides[currentSlide];
 
   // Early return if loading or no data
-  if (loading) {
+  if (isPending) {
     return (
       <div className="relative w-full h-screen overflow-hidden bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -112,13 +94,13 @@ export default function StallRoomSlider() {
         <div className="text-center max-w-md mx-auto p-6">
           <div className="text-6xl mb-4">🚫</div>
           <div className="text-red-800 font-semibold mb-2">Failed to Load Real Data</div>
-          <div className="text-red-600 mb-4 text-sm">{error}</div>
+          <div className="text-red-600 mb-4 text-sm">{error?.toString()}</div>
           <div className="text-gray-600 text-sm mb-6">
             Unable to fetch exhibitor data from the API server.
             Please check your internet connection and try again.
           </div>
           <button
-            onClick={() => dispatch(fetchExhibitors())}
+            onClick={() => window.location.reload()}
             className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             🔄 Retry API Request
@@ -136,7 +118,7 @@ export default function StallRoomSlider() {
           <div className="text-yellow-800 font-semibold mb-2">No Exhibitors Found</div>
           <div className="text-yellow-600 mb-4">The API returned an empty dataset.</div>
           <button
-            onClick={() => dispatch(fetchExhibitors())}
+            onClick={() => window.location.reload()}
             className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             🔄 Refresh Data
@@ -144,7 +126,9 @@ export default function StallRoomSlider() {
         </div>
       </div>
     );
-  }  return (
+  }
+
+  return (
     <div
       className="relative w-full h-screen overflow-hidden bg-gray-100"
       onTouchStart={handleTouchStart}
@@ -160,7 +144,6 @@ export default function StallRoomSlider() {
           </div>
         </div>
 
-        {/* Slide content */}
         {/* Slide content */}
         <div
           className="flex-1 relative"
@@ -186,7 +169,6 @@ export default function StallRoomSlider() {
             <div className="flex flex-col">
               {/* Title on top of the wall - Hanging Name */}
               <HangingBoard currentSlideData={currentSlideData} />
-
             </div>
           </Wall>
 
@@ -195,95 +177,95 @@ export default function StallRoomSlider() {
         </div>
 
         {/* Navigation buttons */}
-    <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-[90%] max-w-2xl flex items-center justify-between bg-black/60 rounded-full px-6 py-3 shadow-lg z-50">
-      <button
-        onClick={prevSlide}
-        disabled={totalSlides <= 1}
-        className="bg-white/80 hover:bg-white text-gray-800 p-2 xs:p-3 sm:p-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <svg
-          className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={3}
-        d="M15 19l-7-7 7-7"
-          />
-        </svg>
-      </button>
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-[90%] max-w-2xl flex items-center justify-between bg-black/60 rounded-full px-6 py-3 shadow-lg z-50">
+          <button
+            onClick={prevSlide}
+            disabled={totalSlides <= 1}
+            className="bg-white/80 hover:bg-white text-gray-800 p-2 xs:p-3 sm:p-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg
+              className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
 
-    <button
-      className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-6 py-2 rounded-full shadow transition"
-      onClick={() => {
-        if (currentSlideData?.ID) {
-        router.push(`/exhibitor/${currentSlideData.ID}`);
-        }
-      }}
-    >
-      Visit Booth
-    </button>
+          <button
+            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-6 py-2 rounded-full shadow transition"
+            onClick={() => {
+              if (currentSlideData?.ID) {
+                router.push(`/exhibitor/${currentSlideData.ID}`);
+              }
+            }}
+          >
+            Visit Booth
+          </button>
 
-      <button
-        onClick={nextSlide}
-        disabled={totalSlides <= 1}
-        className="bg-white/80 hover:bg-white text-gray-800 p-2 xs:p-3 sm:p-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <svg
-          className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={3}
-        d="M9 5l7 7-7 7"
-          />
-        </svg>
-      </button>
-    </div>
+          <button
+            onClick={nextSlide}
+            disabled={totalSlides <= 1}
+            className="bg-white/80 hover:bg-white text-gray-800 p-2 xs:p-3 sm:p-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg
+              className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </div>
 
         {/* Avatar and Table Overlay */}
-        <div className="absolute h-full lg:w-[25vw] md:w-[40vw] right-0 bottom-0 lg:right-[-105] z-[100] flex flex-1 max-sm:left-1/2 max-sm:-translate-x-1/2">
+        <div className="absolute h-full lg:w-[25vw] md:w-[40vw] right-0 bottom-0 lg:right-[-105px] z-[100] flex flex-1 max-sm:left-1/2 max-sm:-translate-x-1/2">
           <div className="h-full w-full flex flex-col relative">
             {/* Image of the avatar */}
             <div className="absolute z-1 bottom-0 lg:left-[22%] md:left-[15%] max-sm:left-[5vw]">
               <Image
-            src="/avatar.png"
-            alt="Avatar"
-            width={230}
-            height={220}
-            className="lg:h-[52vh] md:h-[50vh] h-[60vh] max-sm:h-[42vh] sm:landscape:h-[45vh] sm:landscape:w-[10vw]"
-            priority
+                src="/avatar.png"
+                alt="Avatar"
+                width={230}
+                height={220}
+                className="lg:h-[52vh] md:h-[50vh] h-[60vh] max-sm:h-[42vh] sm:landscape:h-[45vh] sm:landscape:w-[10vw]"
+                priority
               />
             </div>
 
             {/* Table Image as background */}
             <div className="absolute z-5 lg:bottom-[-65px] md:bottom-[-14vh] bottom-[-55px] sm:landscape:bottom-[-14vh] max-sm:left-[9%]">
               <Image
-            src="/table.png"
-            alt="Table"
-            width={350}
-            height={100}
-            className="object-fit lg:h-[70vh] h-[90vh] md:h-[78vh] max-sm:h-[52vh] sm:landscape:h-[70vh] sm:landscape:w-[40vh]"
-            priority
+                src="/table.png"
+                alt="Table"
+                width={350}
+                height={100}
+                className="object-fit lg:h-[70vh] h-[90vh] md:h-[78vh] max-sm:h-[52vh] sm:landscape:h-[70vh] sm:landscape:w-[40vh]"
+                priority
               />
             </div>
 
             {/* Logo on the table */}
             <div className="absolute z-10 bottom-0 md:bottom-[12vh] max-sm:bottom-[8vh] sm:landscape:bottom-[7vh] lg:left-[20%] md:left-[20%] max-sm:left-[25%]">
               <Image
-            src="/opexn_logo.png"
-            alt="Logo"
-            width={120}
-            height={50}
-            className="object-fit lg:h-12 md:h-10 w-full max-sm:h-6 sm:landscape:h-[5vh] md:landscape:h-[4vh] md:landscape:w-[10vw]"
-            priority
+                src="/opexn_logo.png"
+                alt="Logo"
+                width={120}
+                height={50}
+                className="object-fit lg:h-12 md:h-10 w-full max-sm:h-6 sm:landscape:h-[5vh] md:landscape:h-[4vh] md:landscape:w-[10vw]"
+                priority
               />
             </div>
           </div>

@@ -1,66 +1,83 @@
 "use client"
 
-import { motion } from "framer-motion"
-import Image from "next/image"
-import {
-  MapPin,
-  Mail,
-  Phone,
-  Globe,
-  User,
-  DollarSign,
-  Package,
-  Target,
-  Users,
-  TrendingUp,
-  Award,
-  ExternalLink,
-  MessageCircle,
-  Video,
-  Send,
-  Calendar,
-  Clock,
-  Minimize2,
-} from "lucide-react"
-import { useState, useRef, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useAppDispatch, useAppSelector } from "@/store/hooks"
-import { fetchExhibitors } from "@/store/exhibitorSlice"
-import { useParams, useRouter } from "next/navigation"
-import React from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useGetExhibitor } from "@/hooks/useGetExhibitor"
+import { motion } from "framer-motion"
+import {
+    Award,
+    Calendar,
+    Clock,
+    DollarSign,
+    ExternalLink,
+    Globe,
+    Mail,
+    MapPin,
+    MessageCircle,
+    Minimize2,
+    Package,
+    Phone,
+    Send,
+    Target,
+    TrendingUp,
+    User,
+    Users,
+    Video,
+} from "lucide-react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import React, { useEffect, useRef, useState } from "react"
 
 interface CompanyProfileProps {
   params: Promise<{ id: string }>
 }
 
 const CompanyProfile = ({ params }: CompanyProfileProps) => {
-  const dispatch = useAppDispatch()
   const router = useRouter()
-  const { data, loading, error } = useAppSelector((state) => state.exhibitors)
+  const { data, isPending, error } = useGetExhibitor()
 
-  // Get the ID from params using React.use() for Next.js 15 compatibility
   const resolvedParams = React.use(params)
   const exhibitorId = parseInt(resolvedParams?.id || "1")
 
-  // Find the specific exhibitor from Redux store
-  const companyData = data.find(exhibitor => exhibitor.ID === exhibitorId)
-
-  // All React hooks must be called before any early returns
+  // --- all hooks must go here ---
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false)
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: companyData?.name || "Company",
-      message: `Hello! Welcome to ${companyData?.name || "our company"}. How can we help you today?`,
-      timestamp: new Date(),
-      isBot: true,
-    },
-  ])
+  const [messages, setMessages] = useState<any[]>([])
   const [newMessage, setNewMessage] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+
+
+  // Define the Exhibitor type for proper typing
+  interface Exhibitor {
+    ID: number
+    name: string
+    banner?: string
+    logo?: string
+    products: Array<{ ID: number; title: string; description?: string }>
+    revenueInfo: { revenueBracket: string; userImpact: number }
+    fundingInfo: { fundingType: string }
+    director: { directorName: string; directorEmail: string }
+    spoc: { Name: string; Position: string; Email: string; Phone: string }
+    websiteURL: string
+    address: { street: string; city: string; state: string; pincode: string }
+    dpiitCertNumber: string
+  }
+
+  // Find the specific company data based on ID
+  const companyData = data?.find((exhibitor: Exhibitor) => exhibitor.ID === exhibitorId)
+
+  console.log("company data: ", companyData);
+  
 
   // Update messages when companyData changes
   useEffect(() => {
@@ -77,16 +94,8 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
     }
   }, [companyData])
 
-  // Fetch data if not available
-  useEffect(() => {
-    if (data.length === 0 && !loading) {
-      console.log('🔄 Exhibitor Detail: Fetching data for ID:', exhibitorId)
-      dispatch(fetchExhibitors())
-    }
-  }, [dispatch, data.length, loading, exhibitorId])
-
   // Show loading state if data is being fetched
-  if (loading) {
+  if (isPending) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100 flex items-center justify-center">
         <div className="text-center">
@@ -105,12 +114,12 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
         <div className="text-center max-w-md mx-auto p-6">
           <div className="text-6xl mb-4">🚫</div>
           <div className="text-red-800 font-semibold mb-2">Failed to Load Exhibitor Data</div>
-          <div className="text-red-600 mb-4 text-sm">{error}</div>
+          <div className="text-red-600 mb-4 text-sm">{error?.toString()}</div>
           <div className="text-gray-600 text-sm mb-6">
             Unable to fetch exhibitor data from the API server.
           </div>
           <Button
-            onClick={() => dispatch(fetchExhibitors())}
+            onClick={() => window.location.reload()}
             className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg mr-4"
           >
             🔄 Retry API Request
@@ -149,14 +158,6 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
     )
   }
 
-  // Helper functions
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -476,7 +477,7 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="grid gap-6">
-                      {companyData.products.map((product, index) => (
+                      {companyData.products.map((product: { ID: number; title: string; description?: string }, index: number) => (
                         <motion.div
                           key={product.ID}
                           initial={{ x: -20, opacity: 0 }}
