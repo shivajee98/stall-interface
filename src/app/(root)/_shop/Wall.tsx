@@ -1,26 +1,26 @@
-import React from 'react'
-import Image from 'next/image'
-import { Package } from 'lucide-react'
+import React from "react";
+import Image from "next/image";
+import { Package } from "lucide-react";
 
 interface WallProps {
-  children?: React.ReactNode
-  banner?: string
+  children?: React.ReactNode;
+  banner?: string;
   companyData?: {
-    name: string
-    logo: string
+    name: string;
+    logo: string;
     products: Array<{
-      ID: number
-      title: string
-      description?: string
-    }>
+      ID: number;
+      title: string;
+      description?: string;
+    }>;
     revenueInfo?: {
-      revenueBracket: string
-      userImpact: number
-    }
+      revenueBracket: string;
+      userImpact: number;
+    };
     fundingInfo?: {
-      fundingType: string
-    }
-  }
+      fundingType: string;
+    };
+  };
 }
 
 const Wall = ({ children, banner, companyData }: WallProps) => {
@@ -40,8 +40,10 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
               if (React.isValidElement(child)) {
                 const childProps = child.props as any;
                 // Skip Exhibitor components by checking for exhibitorData prop
-                if (childProps?.exhibitorData ||
-                    (child.key && child.key.toString().includes('exhibitor'))) {
+                if (
+                  childProps?.exhibitorData ||
+                  (child.key && child.key.toString().includes("exhibitor"))
+                ) {
                   return null;
                 }
               }
@@ -54,10 +56,11 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
         {companyData && (
           <div className="absolute inset-0 flex items-center justify-center p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8">
             <div className="w-full h-full flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-8 items-center justify-center max-w-7xl mx-auto">
-
               {/* Left Side - Product Icons */}
               <div className="w-full lg:col-span-2 flex lg:flex-col flex-row justify-center lg:justify-start items-center gap-2 lg:gap-4 order-2 lg:order-1">
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 hidden lg:block">Products</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 hidden lg:block">
+                  Products
+                </h3>
                 <div className="flex lg:flex-col flex-row gap-2 lg:gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 max-w-full">
                   {companyData.products.slice(0, 4).map((product, index) => (
                     <div
@@ -70,7 +73,9 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
                   ))}
                   {companyData.products.length > 4 && (
                     <div className="flex-shrink-0 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <span className="text-white text-xs lg:text-sm font-bold">+{companyData.products.length - 4}</span>
+                      <span className="text-white text-xs lg:text-sm font-bold">
+                        +{companyData.products.length - 4}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -85,11 +90,12 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
                   <p className="text-sm sm:text-lg md:text-xl lg:text-2xl text-gray-700 font-medium">
                     Premium Technology Solutions
                   </p>
-                  {companyData.products.length > 0 && companyData.products[0].description && (
-                    <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto line-clamp-2 lg:line-clamp-none">
-                      {companyData.products[0].description}
-                    </p>
-                  )}
+                  {companyData.products.length > 0 &&
+                    companyData.products[0].description && (
+                      <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto line-clamp-2 lg:line-clamp-none">
+                        {companyData.products[0].description}
+                      </p>
+                    )}
                   <div className="flex flex-wrap justify-center gap-1 sm:gap-2 mt-3 sm:mt-6">
                     {companyData.revenueInfo && (
                       <span className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full font-medium shadow-lg">
@@ -98,7 +104,8 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
                     )}
                     {companyData.revenueInfo && (
                       <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full font-medium shadow-lg">
-                        {companyData.revenueInfo.userImpact.toLocaleString()} Users
+                        {companyData.revenueInfo.userImpact.toLocaleString()}{" "}
+                        Users
                       </span>
                     )}
                     {companyData.fundingInfo && (
@@ -132,7 +139,7 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Wall
+export default Wall;
