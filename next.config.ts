@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
         hostname: 'opexn-expo.onrender.com',
       },
       {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.test',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         port: '8000',

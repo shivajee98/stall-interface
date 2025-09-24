@@ -18,10 +18,12 @@ export default function StallRoomSlider() {
   const { data, isPending, error } = useGetExhibitor();
   const router = useRouter();
 
-  const slides = useMemo(() => data ?? [], [data]);
-
-  console.log("slides: ", slides);
-
+  const slides = useMemo(() => {
+    if (data && data.length > 0) {
+      return data;
+    }
+    return [];
+  }, [data]);
 
 
   // Use data as the slides array, fallback to empty array if not loaded
@@ -50,6 +52,7 @@ export default function StallRoomSlider() {
         setAutoPlay(!autoPlay);
       }
     };
+
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [autoPlay, nextSlide, prevSlide]);
@@ -201,8 +204,8 @@ export default function StallRoomSlider() {
           <button
             className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-6 py-2 rounded-full shadow transition"
             onClick={() => {
-              if (currentSlideData?.ID) {
-                router.push(`/exhibitor/${currentSlideData.ID}`);
+              if (currentSlideData?.id) {
+                router.push(`/exhibitor/${currentSlideData.id}`);
               }
             }}
           >
@@ -236,7 +239,7 @@ export default function StallRoomSlider() {
             {/* Image of the avatar */}
             <div className="absolute z-1 bottom-0 lg:left-[22%] md:left-[15%] max-sm:left-[5vw]">
               <Image
-                src="/avatar.png"
+                src="https://ik.imagekit.io/librarysanju/Opexn%20Stall%20Components/avatar.png?updatedAt=1758706895766"
                 alt="Avatar"
                 width={230}
                 height={220}
@@ -248,11 +251,11 @@ export default function StallRoomSlider() {
             {/* Table Image as background */}
             <div className="absolute z-5 lg:bottom-[-65px] md:bottom-[-14vh] bottom-[-55px] sm:landscape:bottom-[-14vh] max-sm:left-[9%]">
               <Image
-                src="/table.png"
+                src="https://ik.imagekit.io/librarysanju/Opexn%20Stall%20Components/table_1.png?updatedAt=1758706828511"
                 alt="Table"
                 width={350}
                 height={100}
-                className="object-fit lg:h-[70vh] h-[90vh] md:h-[78vh] max-sm:h-[52vh] sm:landscape:h-[70vh] sm:landscape:w-[40vh]"
+                className="object-fit lg:h-[70vh] h-[90vh] md:h-[38vh] sm:landscape:h-[36vh] sm:landscape:w-[40vh] max-sm:h-[52vh]"
                 priority
               />
             </div>
@@ -260,11 +263,11 @@ export default function StallRoomSlider() {
             {/* Logo on the table */}
             <div className="absolute z-10 bottom-0 md:bottom-[12vh] max-sm:bottom-[8vh] sm:landscape:bottom-[7vh] lg:left-[20%] md:left-[20%] max-sm:left-[25%]">
               <Image
-                src="/opexn_logo.png"
+                src="https://ik.imagekit.io/librarysanju/Opexn%20Stall%20Components/opexn_logo.png?updatedAt=1758706878424"
                 alt="Logo"
                 width={120}
                 height={50}
-                className="object-fit lg:h-12 md:h-10 w-full max-sm:h-6 sm:landscape:h-[5vh] md:landscape:h-[4vh] md:landscape:w-[10vw]"
+                className="object-fit lg:h-5 md:h-10 w-full max-sm:h-6 sm:landscape:h-[5vh] md:landscape:h-[4vh] md:landscape:w-[10vw]"
                 priority
               />
             </div>

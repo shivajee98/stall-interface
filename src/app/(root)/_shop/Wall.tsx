@@ -9,9 +9,12 @@ interface WallProps {
     name: string;
     logo: string;
     products: Array<{
-      ID: number;
+      id: number;
       title: string;
       description?: string;
+      images?: Array<{ url: string }>;
+      category?: string;
+      stage?: string;
     }>;
     revenueInfo?: {
       revenueBracket: string;
@@ -35,7 +38,7 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
         {/* Keep original children (like HangingBoard) but filter out Exhibitor cards */}
         {children && (
           <div className="relative z-20">
-            {React.Children.map(children, (child) => {
+            {React.Children.map(children, (child, index) => {
               // Only render HangingBoard and other non-Exhibitor components
               if (React.isValidElement(child)) {
                 const childProps = child.props as any;
@@ -46,6 +49,10 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
                 ) {
                   return null;
                 }
+                // Clone element with proper key to avoid React warnings
+                return React.cloneElement(child, {
+                  key: child.key || `wall-child-${index}`
+                });
               }
               return child;
             })}
@@ -64,11 +71,24 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
                 <div className="flex lg:flex-col flex-row gap-2 lg:gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 max-w-full">
                   {companyData.products.slice(0, 4).map((product, index) => (
                     <div
-                      key={product.ID}
-                      className="flex-shrink-0 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-110"
+                      key={product.id ? `product-${product.id}` : `product-${index}`}
+                      className="flex-shrink-0 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-110 border-2 border-orange-200 group-hover:border-orange-300"
                       title={product.title}
                     >
-                      <Package className="h-4 w-4 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-white group-hover:scale-110 transition-transform duration-300" />
+                      {product.images && product.images.length > 0 && !product.images[0].url.includes('cdn.test') ? (
+                        <Image
+                          src={product.images[0].url}
+                          alt={product.title}
+                          width={64}
+                          height={64}
+                          className="w-full h-full object-contain p-1 rounded-lg"
+                          onError={() => {
+                            // Fallback to Package icon on error
+                          }}
+                        />
+                      ) : (
+                        <Package className="h-4 w-4 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-orange-600 group-hover:scale-110 transition-transform duration-300" />
+                      )}
                     </div>
                   ))}
                   {companyData.products.length > 4 && (
@@ -118,22 +138,19 @@ const Wall = ({ children, banner, companyData }: WallProps) => {
               </div>
 
               {/* Right Side - Company Logo in Square Shape */}
-              <div className="w-full lg:col-span-2 flex justify-center lg:justify-end order-3">
+            <div className="w-full lg:col-span-2 flex justify-center lg:justify-start order-3">
                 <div className="relative group">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 bg-white rounded-2xl shadow-2xl p-2 sm:p-3 lg:p-4 group-hover:shadow-3xl transition-all duration-300 border-2 sm:border-4 border-orange-200 group-hover:border-orange-300">
-                    <Image
-                      src={companyData.logo || "/placeholder.svg"}
-                      alt={companyData.name}
-                      width={160}
-                      height={160}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 lg:-bottom-2 lg:-right-2 w-4 h-4 lg:w-6 lg:h-6 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-                    <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-white rounded-full animate-pulse"></div>
-                  </div>
+                    <div className="w-40 h-56 sm:w-56 sm:h-72 md:w-64 md:h-96 lg:w-80 lg:h-[28rem] xl:w-96 xl:h-[32rem] bg-white rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 group-hover:shadow-3xl transition-all duration-300 border-4 lg:border-8 border-orange-200 group-hover:border-orange-300 flex items-center justify-center">
+                        <Image
+                            src={companyData.logo || "/placeholder.svg"}
+                            alt={companyData.name}
+                            width={384}
+                            height={512}
+                            className="w-full h-full object-contain"
+                        />
+                    </div>
                 </div>
-              </div>
+            </div>
             </div>
           </div>
         )}

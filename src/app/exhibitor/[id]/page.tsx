@@ -6,20 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetExhibitor } from "@/hooks/useGetExhibitor";
 import { motion } from "framer-motion";
 import {
-  Award,
-  DollarSign,
-  ExternalLink,
-  Globe,
-  Mail,
-  MapPin,
-  MessageCircle,
-  Package,
-  Phone,
-  Target,
-  TrendingUp,
-  User,
-  Users,
-  Video,
+    DollarSign,
+    ExternalLink,
+    Globe,
+    Mail,
+    MapPin,
+    MessageCircle,
+    Package,
+    Phone,
+    Target,
+    TrendingUp,
+    User,
+    Users,
+    Video
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -40,28 +39,42 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
   const exhibitorId = parseInt(resolvedParams?.id || "1");
 
   // --- all hooks must go here ---
-
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
 
-  // Define the Exhibitor type for proper typing
+  // Updated Exhibitor type to match provided data
   interface Exhibitor {
-    ID: number;
+    id: number;
     name: string;
-    banner?: string;
-    logo?: string;
-    products: Array<{ ID: number; title: string; description?: string }>;
+    bannerUrl: string | null;
+    logoUrl?: string | null;
+    products: Array<{
+      id: number;
+      title: string;
+      description?: string;
+      category?: string;
+      images?: Array<{ url: string }>;
+      price?: number;
+      productType?: string;
+      quantity?: number;
+      stage?: string;
+      startupId?: number;
+      tags?: string;
+      users?: string[];
+    }>;
     revenueInfo: { revenueBracket: string; userImpact: number };
     fundingInfo: { fundingType: string };
-    director: { directorName: string; directorEmail: string };
-    spoc: { Name: string; Position: string; Email: string; Phone: string };
-    websiteURL: string;
+    director: { name: string; email: string };
+    spoc: { name: string; position: string; email: string; phone: string };
+    websiteUrl: string;
     address: { street: string; city: string; state: string; pincode: string };
     dpiitCertNumber: string;
+    eventIntent?: { whyParticipate?: string; expectation?: string; consentToPay?: boolean };
+    pitchDeckUrl?: string;
   }
 
   // Find the specific company data based on ID
   const companyData = data?.find(
-    (exhibitor: Exhibitor) => exhibitor.ID === exhibitorId
+    (exhibitor: Exhibitor) => exhibitor.id === exhibitorId
   );
 
   // Show loading state if data is being fetched
@@ -175,7 +188,7 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
       >
         <div className="absolute inset-0 bg-gradient-to-r from-orange-600/80 to-yellow-600/80 z-10" />
         <Image
-          src={companyData.banner || "/placeholder.svg"}
+          src={companyData.bannerUrl || "/placeholder.svg"}
           alt="Company Banner"
           fill
           className="object-cover"
@@ -190,7 +203,7 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
             <div className="flex items-center justify-center mb-4">
               <div className="w-20 h-20 rounded-full bg-white p-2 shadow-2xl">
                 <Image
-                  src={companyData.logo || "/placeholder.svg"}
+                  src={companyData.logoUrl || "/placeholder.svg"}
                   alt={companyData.name}
                   width={80}
                   height={80}
@@ -290,52 +303,63 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="grid gap-6">
-                      {companyData.products.map(
-                        (
-                          product: {
-                            ID: number;
-                            title: string;
-                            description?: string;
-                          },
-                          index: number
-                        ) => (
-                          <motion.div
-                            key={product.ID}
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="p-6 rounded-xl bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 hover:shadow-lg transition-all duration-300"
-                          >
-                           <Link href={`product/${product.ID}`}>
+                      {companyData.products.map((product: Exhibitor['products'][number], index: number) => (
+                        <motion.div
+                          key={product.id ? `product-${product.id}` : `product-${index}`}
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="p-6 rounded-xl bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 hover:shadow-lg transition-all duration-300"
+                        >
+                          <Link href={`product/${product.id}`}>
                             <div className="flex justify-between items-start mb-4">
                               <div>
                                 <h3 className="text-xl font-bold text-gray-800 mb-2">
                                   {product.title}
                                 </h3>
                                 <Badge className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
-                                  Product
+                                  {product.productType || "Product"}
                                 </Badge>
+                                <div className="mt-2 flex gap-2 flex-wrap">
+                                  {product.tags && product.tags.split(",").map((tag: string, i: number) => (
+                                    <Badge key={i} className="bg-orange-100 text-orange-700">{tag.trim()}</Badge>
+                                  ))}
+                                </div>
                               </div>
                               <div className="text-right">
                                 <p className="text-lg font-bold text-orange-600">
-                                  ID: {product.ID}
+                                  ID: {product.id}
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                  Digital Solution
+                                  {product.category}
                                 </p>
+                                {product.price && (
+                                  <p className="text-sm text-green-600 font-semibold">₹{product.price}</p>
+                                )}
                               </div>
                             </div>
-                           </Link>
-                            {product.description && (
-                              <div className="mt-4">
-                                <p className="text-gray-600">
-                                  {product.description}
-                                </p>
-                              </div>
-                            )}
-                          </motion.div>
-                        )
-                      )}
+                          </Link>
+                          {product.images && product.images.length > 0 && (
+                            <div className="flex gap-2 mb-2">
+                              {product.images.map((img: { url: string }, idx: number) => (
+                                <Image
+                                  key={idx}
+                                  src={img.url}
+                                  alt={product.title}
+                                  width={60}
+                                  height={60}
+                                  className="rounded-lg object-cover border"
+                                />
+                              ))}
+                            </div>
+                          )}
+                          {product.description && (
+                            <div className="mt-4">
+                              <p className="text-gray-600">{product.description}</p>
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -400,16 +424,14 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
                         <User className="h-8 w-8 text-white" />
                       </div>
                       <h3 className="font-bold text-lg text-gray-800">
-                        {companyData.director.directorName}
+                        {companyData.director.name}
                       </h3>
                       <p className="text-gray-600">Director</p>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Mail className="h-4 w-4 text-orange-500" />
-                        <span className="break-all">
-                          {companyData.director.directorEmail}
-                        </span>
+                        <span className="break-all">{companyData.director.email}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -428,34 +450,24 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
                   <CardContent className="p-6">
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">
-                          SPOC Details
-                        </h4>
+                        <h4 className="font-semibold text-gray-800 mb-2">SPOC Details</h4>
                         <div className="space-y-2">
-                          <p className="font-medium text-gray-800">
-                            {companyData.spoc.Name}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {companyData.spoc.Position}
-                          </p>
+                          <p className="font-medium text-gray-800">{companyData.spoc.name}</p>
+                          <p className="text-sm text-gray-600">{companyData.spoc.position}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Mail className="h-4 w-4 text-orange-500" />
-                            <span className="break-all">
-                              {companyData.spoc.Email}
-                            </span>
+                            <span className="break-all">{companyData.spoc.email}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Phone className="h-4 w-4 text-orange-500" />
-                            <span>{companyData.spoc.Phone}</span>
+                            <span>{companyData.spoc.phone}</span>
                           </div>
                         </div>
                       </div>
                       <div className="pt-4 border-t border-gray-200">
                         <Button
                           className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white"
-                          onClick={() =>
-                            window.open(companyData.websiteURL, "_blank")
-                          }
+                          onClick={() => window.open(companyData.websiteUrl, "_blank")}
                         >
                           <Globe className="h-4 w-4 mr-2" />
                           Visit Website
@@ -524,12 +536,8 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="space-y-2 text-gray-600">
-                      <p className="font-medium">
-                        {companyData.address.street}
-                      </p>
-                      <p>
-                        {companyData.address.city}, {companyData.address.state}
-                      </p>
+                      <p className="font-medium">{companyData.address.street}</p>
+                      <p>{companyData.address.city}, {companyData.address.state}</p>
                       <p>PIN: {companyData.address.pincode}</p>
                     </div>
                   </CardContent>

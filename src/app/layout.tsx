@@ -16,6 +16,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Stall Page",
   description: "Stall of the Exhibitors",
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' }
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/icon.jpeg',
+  },
 };
 
 export default function RootLayout({
