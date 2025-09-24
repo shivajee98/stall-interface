@@ -1,12 +1,9 @@
 "use client";
 
-import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Play, ExternalLink } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import PulsingCircle from "../../_components/pulsing-circle";
+import React from "react";
 
 interface ProductPageProps {
   params: Promise<{ productId: string }>;
@@ -84,9 +81,6 @@ const ProductPage = ({ params }: ProductPageProps) => {
             Want to Purchase Product
           </Button>
         </div>
-
-        {/* Pulsing Circle - positioned outside container for proper absolute positioning */}
-        <PulsingCircle />
       </div>
     </div>
   );

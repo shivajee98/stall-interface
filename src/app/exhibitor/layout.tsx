@@ -1,9 +1,8 @@
+import Image from "next/image";
 import React from "react";
 import Ceiling from "../(root)/_shop/Ceiling";
-import Wall from "../(root)/_shop/Wall";
 import Floor from "../(root)/_shop/Floor";
 import ExhibitorWall from "./_components/exhibitor-wall";
-import Image from "next/image";
 
 const ExhibitionLayout = ({ children }: { children: React.ReactNode }) => {
   return (
