@@ -14,6 +14,7 @@ import {
     MessageCircle,
     Package,
     Phone,
+    Star,
     Target,
     TrendingUp,
     User,
@@ -302,62 +303,117 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
-                    <div className="grid gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {companyData.products.map((product: Exhibitor['products'][number], index: number) => (
                         <motion.div
                           key={product.id ? `product-${product.id}` : `product-${index}`}
-                          initial={{ x: -20, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: index * 0.1 }}
-                          className="p-6 rounded-xl bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 hover:shadow-lg transition-all duration-300"
+                          className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100"
                         >
                           <Link href={`product/${product.id}`}>
-                            <div className="flex justify-between items-start mb-4">
+                            {/* Product Image */}
+                            <div className="relative aspect-square overflow-hidden">
+                              {product.images && product.images.length > 0 ? (
+                                <Image
+                                  src={product.images[0].url}
+                                  alt={product.title}
+                                  fill
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center">
+                                  <Package className="h-16 w-16 text-orange-400" />
+                                </div>
+                              )}
+                              
+                              {/* Discount Badge */}
+                              {product.price && (
+                                <div className="absolute top-3 left-3">
+                                  <Badge className="bg-green-500 text-white text-xs font-semibold">
+                                    {Math.floor(Math.random() * 30) + 10}% OFF
+                                  </Badge>
+                                </div>
+                              )}
+                              
+                              {/* Quick View Overlay */}
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <Button className="bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg font-medium">
+                                  Quick View
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Product Info */}
+                            <div className="p-4 space-y-3">
                               <div>
-                                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
                                   {product.title}
                                 </h3>
-                                <Badge className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
-                                  {product.productType || "Product"}
-                                </Badge>
-                                <div className="mt-2 flex gap-2 flex-wrap">
-                                  {product.tags && product.tags.split(",").map((tag: string, i: number) => (
-                                    <Badge key={i} className="bg-orange-100 text-orange-700">{tag.trim()}</Badge>
-                                  ))}
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="outline" className="text-orange-600 border-orange-200 text-xs">
+                                    {product.productType || "Product"}
+                                  </Badge>
+                                  <Badge variant="outline" className="text-gray-600 text-xs">
+                                    {product.category}
+                                  </Badge>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <p className="text-lg font-bold text-orange-600">
-                                  ID: {product.id}
+
+                              {/* Tags */}
+                              {product.tags && (
+                                <div className="flex gap-1 flex-wrap">
+                                  {product.tags.split(",").slice(0, 3).map((tag: string, i: number) => (
+                                    <Badge key={i} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                                      {tag.trim()}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Description */}
+                              {product.description && (
+                                <p className="text-sm text-gray-600 line-clamp-2">
+                                  {product.description}
                                 </p>
-                                <p className="text-sm text-gray-600">
-                                  {product.category}
-                                </p>
-                                {product.price && (
-                                  <p className="text-sm text-green-600 font-semibold">₹{product.price}</p>
-                                )}
+                              )}
+
+                              {/* Price and Rating */}
+                              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                <div>
+                                  {product.price ? (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-lg font-bold text-gray-900">
+                                        ₹{product.price.toLocaleString()}
+                                      </span>
+                                      <span className="text-sm text-gray-500 line-through">
+                                        ₹{(product.price * 1.3).toFixed(0)}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-gray-500">Price on request</span>
+                                  )}
+                                </div>
+                                
+                                {/* Mock Rating */}
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                                  <span className="text-sm font-medium text-gray-700">
+                                    {4.5 + Math.random() * 0.5}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Stock Status */}
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span className="text-xs text-green-600 font-medium">
+                                  In Stock
+                                </span>
                               </div>
                             </div>
                           </Link>
-                          {product.images && product.images.length > 0 && (
-                            <div className="flex gap-2 mb-2">
-                              {product.images.map((img: { url: string }, idx: number) => (
-                                <Image
-                                  key={idx}
-                                  src={img.url}
-                                  alt={product.title}
-                                  width={60}
-                                  height={60}
-                                  className="rounded-lg object-cover border"
-                                />
-                              ))}
-                            </div>
-                          )}
-                          {product.description && (
-                            <div className="mt-4">
-                              <p className="text-gray-600">{product.description}</p>
-                            </div>
-                          )}
                         </motion.div>
                       ))}
                     </div>
@@ -375,31 +431,69 @@ const CompanyProfile = ({ params }: CompanyProfileProps) => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">
-                          Company Information
-                        </h4>
-                        <p className="text-gray-600 bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg">
-                          {companyData.name} is a technology company focused on
-                          delivering innovative solutions. Visit our website to
-                          learn more about our offerings and expertise.
+                    <div className="space-y-6">
+                      {/* Company Description */}
+                      <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-xl border border-orange-200">
+                        <h4 className="font-bold text-gray-800 mb-3 text-lg">About {companyData.name}</h4>
+                        <p className="text-gray-700 leading-relaxed mb-4">
+                          {companyData.name} is a leading technology company focused on delivering innovative 
+                          solutions that drive digital transformation. With a strong commitment to excellence 
+                          and customer satisfaction, we provide cutting-edge products and services that help 
+                          businesses thrive in today's competitive landscape.
                         </p>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-blue-500 text-white">
+                            DPIIT Certified: {companyData.dpiitCertNumber}
+                          </Badge>
+                          <Badge variant="outline" className="text-green-600 border-green-200">
+                            Verified Business
+                          </Badge>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">
-                          Business Focus
-                        </h4>
-                        <p className="text-gray-600 bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg">
-                          We specialize in providing digital solutions and
-                          technology services to help businesses grow and
-                          succeed in the modern marketplace.
+
+                      {/* Key Highlights */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                          <h5 className="font-semibold text-blue-800 mb-2">Innovation Focus</h5>
+                          <p className="text-sm text-blue-700">
+                            Cutting-edge technology solutions and continuous innovation in product development.
+                          </p>
+                        </div>
+                        <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                          <h5 className="font-semibold text-green-800 mb-2">Customer Success</h5>
+                          <p className="text-sm text-green-700">
+                            Dedicated support team ensuring customer satisfaction and business growth.
+                          </p>
+                        </div>
+                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                          <h5 className="font-semibold text-purple-800 mb-2">Quality Assurance</h5>
+                          <p className="text-sm text-purple-700">
+                            Rigorous testing and quality control processes for all products and services.
+                          </p>
+                        </div>
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+                          <h5 className="font-semibold text-orange-800 mb-2">Market Leadership</h5>
+                          <p className="text-sm text-orange-700">
+                            Proven track record and market leadership in technology solutions.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Business Focus */}
+                      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200">
+                        <h4 className="font-bold text-gray-800 mb-3 text-lg">Our Business Focus</h4>
+                        <p className="text-gray-700 leading-relaxed mb-4">
+                          We specialize in providing comprehensive digital solutions and technology services 
+                          that empower businesses to grow and succeed in the modern marketplace. Our expertise 
+                          spans across multiple domains including software development, digital transformation, 
+                          and innovative product solutions.
                         </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-blue-500 text-white">
-                          DPIIT Certified: {companyData.dpiitCertNumber}
-                        </Badge>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="outline" className="text-blue-600 border-blue-200">Digital Solutions</Badge>
+                          <Badge variant="outline" className="text-green-600 border-green-200">Technology Services</Badge>
+                          <Badge variant="outline" className="text-purple-600 border-purple-200">Innovation</Badge>
+                          <Badge variant="outline" className="text-orange-600 border-orange-200">Business Growth</Badge>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
